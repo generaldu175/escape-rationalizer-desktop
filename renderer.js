@@ -1,4 +1,4 @@
-const apiKey = '这里换成你那个sk-开头的Key';
+const apiKey = 'sk-a22dce5be3a4414b912ff266a071dc05';
 const chatWindow = document.getElementById('chat-window');
 const sendBtn = document.getElementById('send-btn');
 const inputField = document.getElementById('user-input');
