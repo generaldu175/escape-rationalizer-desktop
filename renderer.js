@@ -1,3 +1,4 @@
+console.log("！！！报告！脚本已经成功加载了！！！");
 const apiKey = 'sk-a22dce5be3a4414b912ff266a071dc05'; // ⭐ 记得填入你的 Key
 
 const chatWindow = document.getElementById('chat-window');
