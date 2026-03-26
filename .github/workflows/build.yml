@@ -1,16 +1,21 @@
-name: Build Desktop App
+name: Build Multi-Platform App
 on: [push]
 jobs:
-  build:
-    runs-on: windows-latest
+  release:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        # 这里让它同时在 Windows 和 Mac 环境下跑
+        os: [windows-latest, macos-latest]
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Install dependencies
         run: npm install
@@ -23,5 +28,8 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Escape-Rationalizer-Windows
-          path: dist/*.exe
+          name: Escape-App-${{ matrix.os }}
+          path: |
+            dist/*.exe
+            dist/*.dmg
+            dist/*.zip
