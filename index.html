@@ -3,73 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>赛博逃避拉扯大师</title>
+    <title>赛博拉扯大师·专业语义版</title>
     <style>
-        body { font-family: sans-serif; background: #121212; color: #e0e0e0; margin: 0; display: flex; flex-direction: column; height: 100vh; }
-        #stats-bar { font-size: 12px; color: #888; text-align: center; padding: 8px; background: #1a1a1a; border-bottom: 1px solid #333; }
-        #chat-window { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-        .message { padding: 12px; border-radius: 12px; max-width: 85%; line-height: 1.5; font-size: 14px; }
-        .user { align-self: flex-end; background: #00ffcc; color: #000; }
-        .system { align-self: flex-start; background: #2c2c2c; border: 1px solid #444; }
-        #action-area { padding: 15px; background: #1a1a1a; border-top: 1px solid #333; display: flex; gap: 8px; }
-        input { flex: 1; background: #000; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 8px; outline: none; }
-        button { background: #00ffcc; color: #000; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .opt-btn { flex: 1; height: 44px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
-        .btn-a { background: #444; color: #fff; }
+        body { font-family: -apple-system, sans-serif; background: #121212; color: #e0e0e0; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        #stats-bar { font-size: 13px; color: #00ffcc; text-align: center; padding: 10px; background: #1a1a1a; border-bottom: 1px solid #333; font-weight: bold; }
+        #chat-window { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .message { padding: 14px 18px; border-radius: 18px; max-width: 85%; line-height: 1.6; font-size: 15px; }
+        .user { align-self: flex-end; background: #00ffcc; color: #000; border-bottom-right-radius: 2px; }
+        .system { align-self: flex-start; background: #2c2c2c; border: 1px solid #444; border-bottom-left-radius: 2px; }
+        #action-area { padding: 20px; background: #1a1a1a; border-top: 1px solid #333; display: flex; gap: 10px; }
+        input { flex: 1; height: 45px; background: #000; border: 1px solid #444; color: #fff; padding: 0 15px; border-radius: 10px; outline: none; }
+        #send-btn { height: 45px; background: #00ffcc; color: #000; border: none; padding: 0 20px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .opt-btn { flex: 1; height: 50px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
+        .btn-a { background: #3d3d3d; color: #fff; }
         .btn-b { background: #ff00ff; color: #fff; }
     </style>
 </head>
 <body>
-    <div id="stats-bar">今日战报加载中...</div>
-    <div id="chat-window"><div class="message system">【拉扯大师】已就绪。说吧，今天又想逃避什么？</div></div>
+    <div id="stats-bar">📊 拉扯实录：正在同步数据...</div>
+    <div id="chat-window"><div class="message system">【赛博拉扯大师】语义分析引擎已启动。请告诉我你现在极度抵触、想逃避的事，我会根据实际情况跟你好好“聊聊”。</div></div>
     <div id="action-area">
-        <input type="text" id="user-input" placeholder="输入你想逃避的事...">
+        <input type="text" id="user-input" placeholder="例如：不想写周报、不想去健身...">
         <button id="send-btn">开启拉扯</button>
     </div>
 
     <script>
-        // --- 核心逻辑 (只定义一次 apiKey) ---
-        const apiKey = 'sk-a22dce5be3a4414b912ff266a071dc05'; 
+        // 1. 填入你的 Key
+        const FINAL_API_KEY = '这里填你真实的sk-xxxx'; 
 
-        let round = 1;
-        let userTask = "";
+        let pullRound = 1;
+        let currentTask = "";
         const chatWindow = document.getElementById('chat-window');
         const actionArea = document.getElementById('action-area');
         const statsBar = document.getElementById('stats-bar');
 
-        const stats = {
-            getTodayKey: () => new Date().toLocaleDateString(),
-            save: (type) => {
-                const today = stats.getTodayKey();
-                let data = JSON.parse(localStorage.getItem('pull_stats_v2') || '{}');
-                if (!data[today]) data[today] = { success: 0, fail: 0 };
-                data[today][type]++;
-                localStorage.setItem('pull_stats_v2', JSON.stringify(data));
-                updateUI();
-            },
-            getToday: () => JSON.parse(localStorage.getItem('pull_stats_v2') || '{}')[stats.getTodayKey()] || { success: 0, fail: 0 }
+        const tracker = {
+            getToday: () => JSON.parse(localStorage.getItem('pull_v4') || '{}')[new Date().toLocaleDateString()] || { win: 0, lose: 0 },
+            record: (type) => {
+                const key = new Date().toLocaleDateString();
+                let data = JSON.parse(localStorage.getItem('pull_v4') || '{}');
+                if (!data[key]) data[key] = { win: 0, lose: 0 };
+                data[key][type]++;
+                localStorage.setItem('pull_v4', JSON.stringify(data));
+                updateStats();
+            }
         };
 
-        function updateUI() {
-            const d = stats.getToday();
-            statsBar.innerText = `📅 今日：成功劝回 ${d.success} | 彻底摆烂 ${d.fail}`;
+        function updateStats() {
+            const d = tracker.getToday();
+            statsBar.innerText = `📅 今日拉扯战报：成功劝回 ${d.win} | 彻底摆烂 ${d.lose}`;
         }
+        window.onload = updateStats;
 
-        window.onload = updateUI;
+        // 2. 核心 AI 语义引擎
+        async function fetchAI(content, round) {
+            let systemPrompt = "";
 
-        async function callAI(content, systemPrompt) {
+            if (round === 1) {
+                // 第一轮：语义分析 + 合理化肯定 + 朋友式温和规劝
+                systemPrompt = `你是一个深谙心理学的赛博拉扯大师。
+                首先，请对用户输入的内容“${content}”进行【语义分析】，判断其属于哪种类型（如：职场压力、身体懒惰、社交恐惧、琐碎家务等）。
+                第一步：基于该类型，给出一个极度合理且扎心的“肯定”。（例如：如果是健身，就说身体需要静养，肌肉也需要灵魂的喘息；如果是加班，就说这种无意义的消耗确实在透支生命）。
+                第二步：换个角度，以好朋友的身份，结合这个事情的“实际获益”进行温和拉扯。
+                最后问他：要去尝试一下吗？`;
+            } else if (round === 2) {
+                // 第二轮：针对性痛点打击（严厉）
+                systemPrompt = `你现在是严厉的执行官。
+                用户依然拒绝做“${content}”。
+                请针对该事情不做的【真实负面后果】进行猛烈抨击。
+                不要讲大道理，要讲具体的“痛点”（比如：不写周报会被裁员、不健身会变丑变虚、不洗碗会招蟑螂）。
+                言辞犀利，直指人心的软弱。问：现在去，还是继续烂掉？`;
+            } else if (round === 3) {
+                // 第三轮：终极情感教诲（智者）
+                systemPrompt = `你是一个看透人生的老者。
+                用户意志非常顽固。请放下攻击性，用极具深度和温情的语言进行“谆谆教诲”。
+                探讨“${content}”背后的意义。不是为了完成任务，而是为了夺回人生的控制权。
+                语气要诚恳得让人想哭，像在拉一个溺水的朋友。最后问：最后一次，愿意为了那个不逃避的自己，试一试吗？`;
+            }
+
             try {
                 const res = await fetch('https://api.deepseek.com/chat/completions', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey.trim()}` },
-                    body: JSON.stringify({ model: "deepseek-chat", messages: [{ role: "system", content: systemPrompt }, { role: "user", content: content }], temperature: 0.8 })
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${FINAL_API_KEY.trim()}` },
+                    body: JSON.stringify({ model: "deepseek-chat", messages: [{ role: "system", content: systemPrompt }, { role: "user", content: content }], temperature: 0.85 })
                 });
                 const data = await res.json();
                 return data.choices[0].message.content;
-            } catch (e) { return "连接失败：" + e.message; }
+            } catch (e) { return "（信号干扰中...）" + e.message; }
         }
 
-        function addLog(role, text) {
+        // 3. 页面交互
+        function addMessage(role, text) {
             const div = document.createElement('div');
             div.className = `message ${role}`;
             div.innerText = text;
@@ -77,52 +101,58 @@
             chatWindow.scrollTop = chatWindow.scrollHeight;
         }
 
-        function createOptions(btnAText, btnBText) {
-            actionArea.innerHTML = ''; 
-            const btnA = document.createElement('button'); btnA.className = 'opt-btn btn-a'; btnA.innerText = btnAText;
-            btnA.onclick = () => handleChoice('A'); 
-            const btnB = document.createElement('button'); btnB.className = 'opt-btn btn-b'; btnB.innerText = btnBText;
-            btnB.onclick = () => handleChoice('B'); 
-            actionArea.appendChild(btnA); actionArea.appendChild(btnB);
-        }
-
-        async function handleChoice(type) {
-            if (type === 'A') {
-                stats.save('success');
-                addLog('system', "拉扯成功！快去行动吧。");
-                setTimeout(resetToInput, 2500);
-            } else {
-                round++;
-                if (round > 3) {
-                    stats.save('fail');
-                    addLog('system', "你赢了，去摆烂吧。");
-                    setTimeout(resetToInput, 2500);
-                } else { processStep(); }
-            }
-        }
-
-        async function processStep() {
-            addLog('system', "思考中...");
-            let p = round === 1 ? `针对“${userTask}”给4个借口并劝导` : (round === 2 ? `严厉教导后果` : `卑微跪求`);
-            const reply = await callAI(userTask, p);
-            chatWindow.removeChild(chatWindow.lastChild);
-            addLog('system', reply);
-            createOptions("被说服了", "就是不去");
-        }
-
-        function resetToInput() {
-            round = 1;
-            actionArea.innerHTML = `<input type="text" id="user-input" placeholder="输入你想逃避的事..."><button id="send-btn">开启拉扯</button>`;
-            document.getElementById('send-btn').onclick = startApp;
-        }
-
-        function startApp() {
+        async function startApp() {
             const input = document.getElementById('user-input');
-            userTask = input.value.trim();
-            if (!userTask) return;
-            addLog('user', userTask);
+            currentTask = input.value.trim();
+            if (!currentTask) return;
+            addMessage('user', "我真的不想去：" + currentTask);
             input.value = '';
-            processStep();
+            runLogic();
+        }
+
+        async function runLogic() {
+            addMessage('system', "正在进行语义建模并思考对策...");
+            const reply = await fetchAI(currentTask, pullRound);
+            chatWindow.removeChild(chatWindow.lastChild);
+            addMessage('system', reply);
+            
+            showButtons("被说服了", "就是不去，再拉扯一下");
+        }
+
+        function showButtons(tA, tB) {
+            actionArea.innerHTML = '';
+            const bA = document.createElement('button');
+            bA.className = 'opt-btn btn-a';
+            bA.innerText = tA;
+            bA.onclick = () => endSession(true);
+
+            const bB = document.createElement('button');
+            bB.className = 'opt-btn btn-b';
+            bB.innerText = tB;
+            bB.onclick = () => {
+                pullRound++;
+                if (pullRound > 3) endSession(false);
+                else runLogic();
+            };
+            actionArea.appendChild(bA);
+            actionArea.appendChild(bB);
+        }
+
+        function endSession(isWin) {
+            if (isWin) {
+                tracker.record('win');
+                addMessage('system', "【拉扯成功】干得漂亮。行动的一刻，你就已经赢了。去吧，别回头！");
+            } else {
+                tracker.record('lose');
+                addMessage('system', "【彻底摆烂】三轮拉扯均告失败。既然你选择了深渊，那就祝你在深渊里睡个好觉。摆烂记录+1。");
+            }
+            setTimeout(reset, 4000);
+        }
+
+        function reset() {
+            pullRound = 1;
+            actionArea.innerHTML = `<input type="text" id="user-input" placeholder="输入不想做的事..."><button id="send-btn">开启拉扯</button>`;
+            document.getElementById('send-btn').onclick = startApp;
         }
 
         document.getElementById('send-btn').onclick = startApp;
