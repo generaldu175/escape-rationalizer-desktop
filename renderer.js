@@ -29,15 +29,18 @@ window.onload = () => {
 
 async function callAI(content, systemPrompt) {
     try {
-        const res = await fetch('https://api.deepseek.com/chat/completions', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey.trim()}` },
-            body: JSON.stringify({
-                model: "deepseek-chat",
-                messages: [{ role: "system", content: systemPrompt }, { role: "user", content: content }],
-                temperature: 0.8
-            })
-        });
+       const res = await fetch('https://api.deepseek.com/chat/completions', {
+    method: 'POST', // 必须是 POST，大写
+    headers: { 
+        'Content-Type': 'application/json', 
+        'Authorization': `Bearer ${apiKey.trim()}` 
+    },
+    body: JSON.stringify({
+        model: "deepseek-chat", // 必须是这个模型名
+        messages: [{ role: "system", content: systemPrompt }, { role: "user", content: content }],
+        temperature: 0.8
+    })
+});
         const data = await res.json();
         return data.choices[0].message.content;
     } catch (e) { return "网络波动，拉扯断线了..."; }
