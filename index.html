@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>赛博逃避合理化</title>
+    <style>
+        /* 刚才小程序里的黑客风UI直接移植过来 */
+        body { background: #0a0a0a; color: #00ff9d; font-family: monospace; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .container { width: 90%; max-width: 600px; height: 80vh; display: flex; flex-direction: column; border: 1px solid #00ff9d; padding: 20px; box-shadow: 0 0 20px rgba(0,255,157,0.2); border-radius: 10px; }
+        .chat-window { flex: 1; overflow-y: auto; margin-bottom: 20px; border-bottom: 1px solid #333; padding: 10px; }
+        .message { margin-bottom: 15px; line-height: 1.5; font-size: 14px; }
+        .user { color: #ff00ff; text-align: right; }
+        .system { color: #00ff9d; border-left: 3px solid #00ff9d; padding-left: 10px; }
+        .input-area { display: flex; gap: 10px; }
+        input { flex: 1; background: #000; border: 1px solid #00ff9d; color: #fff; padding: 10px; border-radius: 5px; outline: none; }
+        button { background: #00ff9d; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; border-radius: 5px; }
+        button:hover { background: #00cc7e; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="chat-window" class="chat-window">
+            <div class="message system">欢迎来到深夜拉扯现场。说吧，不想干啥？</div>
+        </div>
+        <div class="input-area" id="action-area">
+            <input type="text" id="user-input" placeholder="输入你想逃避的事...">
+            <button id="send-btn">开启拉扯</button>
+        </div>
+    </div>
+    <script src="renderer.js"></script>
+</body>
+</html>
