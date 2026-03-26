@@ -1,4 +1,4 @@
-const apiKey = '你的sk-Key'; // ⭐ 记得填入你的 Key
+const apiKey = 'sk-a22dce5be3a4414b912ff266a071dc05'; // ⭐ 记得填入你的 Key
 
 const chatWindow = document.getElementById('chat-window');
 const actionArea = document.getElementById('action-area');
@@ -29,18 +29,40 @@ window.onload = () => {
 
 async function callAI(content, systemPrompt) {
     try {
-       const res = await fetch('https://api.deepseek.com/chat/completions', {
-    method: 'POST', // 必须是 POST，大写
-    headers: { 
-        'Content-Type': 'application/json', 
-        'Authorization': `Bearer ${apiKey.trim()}` 
-    },
-    body: JSON.stringify({
-        model: "deepseek-chat", // 必须是这个模型名
-        messages: [{ role: "system", content: systemPrompt }, { role: "user", content: content }],
-        temperature: 0.8
-    })
-});
+      async function callAI(content, systemPrompt) {
+    try {
+        const url = 'https://api.deepseek.com/chat/completions';
+        console.log("正在请求地址:", url);
+        
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json', 
+                'Authorization': `Bearer ${apiKey.trim()}` 
+            },
+            body: JSON.stringify({
+                model: "deepseek-chat",
+                messages: [
+                    { role: "system", content: systemPrompt }, 
+                    { role: "user", content: content }
+                ],
+                temperature: 0.8
+            })
+        });
+
+        if (!res.ok) {
+            // 如果这里报错，控制台会打印出具体的错误代码（比如 401, 404, 500）
+            console.error("服务器响应异常，状态码:", res.status);
+            return `拉扯断线！错误码: ${res.status}。请确认API Key是否正确或余额是否充足。`;
+        }
+
+        const data = await res.json();
+        return data.choices[0].message.content;
+    } catch (e) { 
+        console.error("网络请求彻底失败:", e);
+        return `网络波动，无法连接到DeepSeek。原因: ${e.message}`; 
+    }
+}
         const data = await res.json();
         return data.choices[0].message.content;
     } catch (e) { return "网络波动，拉扯断线了..."; }
