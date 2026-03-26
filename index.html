@@ -5,38 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>赛博逃避拉扯大师</title>
     <style>
-        /* 样式：黑客赛博风，适配手机 */
-        body { font-family: -apple-system, "Helvetica Neue", sans-serif; background: #121212; color: #e0e0e0; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        #chat-window { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background: radial-gradient(circle at top, #1e1e1e 0%, #121212 100%); }
-        .message { padding: 12px 16px; border-radius: 15px; max-width: 85%; line-height: 1.6; font-size: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
-        .user { align-self: flex-end; background: #00ffcc; color: #000; border-bottom-right-radius: 2px; font-weight: 500; }
-        .system { align-self: flex-start; background: #2c2c2c; border: 1px solid #3d3d3d; border-bottom-left-radius: 2px; }
-        #action-area { padding: 20px; background: #1a1a1a; border-top: 1px solid #333; display: flex; gap: 10px; align-items: center; }
-        input { flex: 1; height: 45px; background: #000; border: 1px solid #444; color: #fff; padding: 0 15px; border-radius: 10px; outline: none; font-size: 14px; }
-        #send-btn { height: 45px; background: #00ffcc; color: #000; border: none; padding: 0 20px; border-radius: 10px; font-weight: bold; cursor: pointer; }
-        .opt-btn { flex: 1; height: 50px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; font-size: 14px; transition: transform 0.1s; }
-        .opt-btn:active { transform: scale(0.95); }
-        .btn-a { background: #3d3d3d; color: #fff; }
-        .btn-b { background: #ff00ff; color: #fff; box-shadow: 0 0 10px rgba(255,0,255,0.3); }
-        #stats-bar { font-size: 12px; color: #888; text-align: center; padding: 5px; background: #121212; border-bottom: 1px solid #222; }
+        body { font-family: sans-serif; background: #121212; color: #e0e0e0; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        #stats-bar { font-size: 12px; color: #888; text-align: center; padding: 8px; background: #1a1a1a; border-bottom: 1px solid #333; }
+        #chat-window { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .message { padding: 12px; border-radius: 12px; max-width: 85%; line-height: 1.5; font-size: 14px; }
+        .user { align-self: flex-end; background: #00ffcc; color: #000; }
+        .system { align-self: flex-start; background: #2c2c2c; border: 1px solid #444; }
+        #action-area { padding: 15px; background: #1a1a1a; border-top: 1px solid #333; display: flex; gap: 8px; }
+        input { flex: 1; background: #000; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 8px; outline: none; }
+        button { background: #00ffcc; color: #000; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .opt-btn { flex: 1; height: 44px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
+        .btn-a { background: #444; color: #fff; }
+        .btn-b { background: #ff00ff; color: #fff; }
     </style>
 </head>
 <body>
-    <div id="stats-bar">正在加载战报...</div>
-    <div id="chat-window">
-        <div class="message system">【赛博拉扯大师】你好。我是你的行动力教练（损友版）。今天又有什么想逃避的事情吗？</div>
-    </div>
+    <div id="stats-bar">今日战报加载中...</div>
+    <div id="chat-window"><div class="message system">【拉扯大师】已就绪。说吧，今天又想逃避什么？</div></div>
     <div id="action-area">
         <input type="text" id="user-input" placeholder="输入你想逃避的事...">
         <button id="send-btn">开启拉扯</button>
     </div>
 
     <script>
-        /************************************************
-         * 1. 基础配置
-         ************************************************/
-        // ⭐ 请在这里填入你的 DeepSeek API Key
-        const apiKey = 'sk-a22dce5be3a4414b912ff266a071dc05'; 
+        // --- 核心逻辑 (只定义一次 apiKey) ---
+        const apiKey = '这里填你真实的sk-xxxx'; 
 
         let round = 1;
         let userTask = "";
@@ -44,62 +37,38 @@
         const actionArea = document.getElementById('action-area');
         const statsBar = document.getElementById('stats-bar');
 
-        /************************************************
-         * 2. 战绩统计逻辑 (LocalStorage)
-         ************************************************/
         const stats = {
             getTodayKey: () => new Date().toLocaleDateString(),
             save: (type) => {
                 const today = stats.getTodayKey();
-                let data = JSON.parse(localStorage.getItem('pull_stats_v1') || '{}');
+                let data = JSON.parse(localStorage.getItem('pull_stats_v2') || '{}');
                 if (!data[today]) data[today] = { success: 0, fail: 0 };
                 data[today][type]++;
-                localStorage.setItem('pull_stats_v1', JSON.stringify(data));
-                updateStatsUI();
+                localStorage.setItem('pull_stats_v2', JSON.stringify(data));
+                updateUI();
             },
-            getToday: () => JSON.parse(localStorage.getItem('pull_stats_v1') || '{}')[stats.getTodayKey()] || { success: 0, fail: 0 }
+            getToday: () => JSON.parse(localStorage.getItem('pull_stats_v2') || '{}')[stats.getTodayKey()] || { success: 0, fail: 0 }
         };
 
-        function updateStatsUI() {
+        function updateUI() {
             const d = stats.getToday();
-            statsBar.innerText = `📅 今日拉扯战报：劝回成功 ${d.success} 次 | 彻底摆烂 ${d.fail} 次`;
+            statsBar.innerText = `📅 今日：成功劝回 ${d.success} | 彻底摆烂 ${d.fail}`;
         }
 
-        window.onload = updateStatsUI;
+        window.onload = updateUI;
 
-        /************************************************
-         * 3. AI 调用逻辑
-         ************************************************/
         async function callAI(content, systemPrompt) {
             try {
                 const res = await fetch('https://api.deepseek.com/chat/completions', {
                     method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json', 
-                        'Authorization': `Bearer ${apiKey.trim()}` 
-                    },
-                    body: JSON.stringify({ 
-                        model: "deepseek-chat", 
-                        messages: [
-                            { role: "system", content: systemPrompt }, 
-                            { role: "user", content: content }
-                        ], 
-                        temperature: 0.8 
-                    })
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey.trim()}` },
+                    body: JSON.stringify({ model: "deepseek-chat", messages: [{ role: "system", content: systemPrompt }, { role: "user", content: content }], temperature: 0.8 })
                 });
-                
-                if (!res.ok) return `API 报错了 (错误码: ${res.status})，请检查 Key 或余额。`;
-                
                 const data = await res.json();
                 return data.choices[0].message.content;
-            } catch (e) { 
-                return "网络异常，无法连接到赛博空间：" + e.message; 
-            }
+            } catch (e) { return "连接失败：" + e.message; }
         }
 
-        /************************************************
-         * 4. 交互逻辑
-         ************************************************/
         function addLog(role, text) {
             const div = document.createElement('div');
             div.className = `message ${role}`;
@@ -110,52 +79,33 @@
 
         function createOptions(btnAText, btnBText) {
             actionArea.innerHTML = ''; 
-            const btnA = document.createElement('button'); 
-            btnA.className = 'opt-btn btn-a'; 
-            btnA.innerText = btnAText;
+            const btnA = document.createElement('button'); btnA.className = 'opt-btn btn-a'; btnA.innerText = btnAText;
             btnA.onclick = () => handleChoice('A'); 
-            
-            const btnB = document.createElement('button'); 
-            btnB.className = 'opt-btn btn-b'; 
-            btnB.innerText = btnBText;
+            const btnB = document.createElement('button'); btnB.className = 'opt-btn btn-b'; btnB.innerText = btnBText;
             btnB.onclick = () => handleChoice('B'); 
-            
-            actionArea.appendChild(btnA); 
-            actionArea.appendChild(btnB);
+            actionArea.appendChild(btnA); actionArea.appendChild(btnB);
         }
 
         async function handleChoice(type) {
             if (type === 'A') {
                 stats.save('success');
-                addLog('user', "好吧，被你说服了，我现在就去！");
-                addLog('system', "【拉扯成功】这就对了！你是最棒的。快关掉网页去行动吧！");
-                setTimeout(resetToInput, 3000);
+                addLog('system', "拉扯成功！快去行动吧。");
+                setTimeout(resetToInput, 2500);
             } else {
                 round++;
                 if (round > 3) {
                     stats.save('fail');
-                    addLog('user', "我不去！我就要摆烂！");
-                    addLog('system', "【拉扯失败】连我的终极劝导都无效...你赢了。去享受你那罪恶的快乐吧。");
-                    setTimeout(resetToInput, 3000);
-                } else {
-                    addLog('user', "我不去，再拉扯一下？");
-                    processStep();
-                }
+                    addLog('system', "你赢了，去摆烂吧。");
+                    setTimeout(resetToInput, 2500);
+                } else { processStep(); }
             }
         }
 
         async function processStep() {
             addLog('system', "思考中...");
-            let p = "";
-            if (round === 1) p = `针对“${userTask}”，给出4个合理的逃避借口，最后话锋一转温和劝导其行动，问要去吗？`;
-            else if (round === 2) p = `针对“${userTask}”，用户依然拒绝。请用严厉、恨铁不成钢的教导主任口吻痛骂其拖延的代价，问到底去不去？`;
-            else if (round === 3) p = `针对“${userTask}”，用户意志极度坚定。请放下尊严，用卑微舔狗、哀求卖萌的语气，求他为了你好一定去一次。`;
-            
+            let p = round === 1 ? `针对“${userTask}”给4个借口并劝导` : (round === 2 ? `严厉教导后果` : `卑微跪求`);
             const reply = await callAI(userTask, p);
-            
-            // 移除刚才的“思考中...”
             chatWindow.removeChild(chatWindow.lastChild);
-            
             addLog('system', reply);
             createOptions("被说服了", "就是不去");
         }
@@ -170,7 +120,7 @@
             const input = document.getElementById('user-input');
             userTask = input.value.trim();
             if (!userTask) return;
-            addLog('user', "我真的不想去：" + userTask);
+            addLog('user', userTask);
             input.value = '';
             processStep();
         }
